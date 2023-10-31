@@ -3,6 +3,7 @@
 namespace TheFox\Network;
 
 use RuntimeException;
+use Socket;
 
 class BsdSocket extends AbstractSocket
 {
@@ -11,23 +12,20 @@ class BsdSocket extends AbstractSocket
      */
     public function __construct()
     {
-        $handle = $this->create();
-        if ($handle) {
-            $this->setHandle($handle);
-        }
+        $this->setHandle($this->create());
     }
 
     /**
      * Creates a new socket resource.
      * https://secure.php.net/manual/en/function.socket-create.php
      *
-     * @return \resource
+     * @return \Socket
      */
-    public function create()
+    public function create(): Socket
     {
-        $socket = null;
+        $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 
-        if (($socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP)) < 0) {
+        if ($socket === false) {
             $errno = socket_last_error();
             throw new RuntimeException('socket_create: ' . socket_strerror($errno), $errno);
         }
@@ -83,27 +81,20 @@ class BsdSocket extends AbstractSocket
         return socket_listen($this->getHandle(), 0);
     }
 
-    /**
-     * @param string $ip
-     * @param int $port
-     */
     public function connect(string $ip, int $port)
     {
         socket_connect($this->getHandle(), $ip, $port);
     }
 
-    /**
-     * @return null|BsdSocket
-     */
-    public function accept()
+
+    public function accept(): ?self
     {
         $handle = socket_accept($this->getHandle());
-        if ($handle !== false) {
-            $socket = new BsdSocket();
-            $socket->setHandle($handle);
-            
-            return $socket;
-        }
+
+        return $handle !== false
+            ? (new self())->setHandle($handle)
+            : null
+            ;
     }
 
     /**

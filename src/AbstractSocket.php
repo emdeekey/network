@@ -2,25 +2,21 @@
 
 namespace TheFox\Network;
 
+use Socket;
+use resource;
+
 abstract class AbstractSocket
 {
-    /**
-     * @var \resource
-     */
-    private $handle;
+    private mixed $handle;
 
-    /**
-     * @param \resource $handle
-     */
-    public function setHandle($handle)
+    public function setHandle(mixed $handle): static
     {
         $this->handle = $handle;
+
+        return $this;
     }
 
-    /**
-     * @return \resource
-     */
-    public function getHandle()
+    public function getHandle(): mixed
     {
         return $this->handle;
     }
@@ -33,7 +29,7 @@ abstract class AbstractSocket
 
     abstract public function connect(string $ip, int $port);
 
-    abstract public function accept();
+    abstract public function accept(): ?self;
 
     abstract public function select(array &$readHandles, array &$writeHandles, array &$exceptHandles): int;
 

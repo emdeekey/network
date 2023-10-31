@@ -6,21 +6,10 @@ use RuntimeException;
 
 class StreamSocket extends AbstractSocket
 {
-    /**
-     * @var string
-     */
-    private $ip = '';
+    private string $ip = '';
 
-    /**
-     * @var int
-     */
-    private $port = 0;
+    private int $port = 0;
 
-    /**
-     * @param string $ip
-     * @param int $port
-     * @return bool
-     */
     public function bind(string $ip, int $port): bool
     {
         $this->ip = $ip;
@@ -64,18 +53,14 @@ class StreamSocket extends AbstractSocket
         }
     }
 
-    /**
-     * @return null|StreamSocket
-     */
-    public function accept()
+    public function accept(): ?self
     {
         $handle = @stream_socket_accept($this->getHandle(), 2);
-        if ($handle !== false) {
-            $socket = new StreamSocket();
-            $socket->setHandle($handle);
 
-            return $socket;
-        }
+        return $handle !== false
+            ? (new self())->setHandle($handle)
+            : null
+            ;
     }
 
     /**
